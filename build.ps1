@@ -33,8 +33,10 @@ $root   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $outDir = Join-Path $root "build"
 if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir | Out-Null }
 $outDll = Join-Path $outDir "FireWarriors.dll"
-$srcCs  = Join-Path $root "FireWarriorsPlugin.cs"
-if (-not (Test-Path $srcCs)) { throw "Source not found: $srcCs" }
+# src\ in the source repository; alongside the script in the game-folder copy.
+$srcCs = Join-Path $root "src\FireWarriorsPlugin.cs"
+if (-not (Test-Path $srcCs)) { $srcCs = Join-Path $root "FireWarriorsPlugin.cs" }
+if (-not (Test-Path $srcCs)) { throw "Source not found: looked for src\FireWarriorsPlugin.cs and FireWarriorsPlugin.cs under $root" }
 
 # Roslyn's own dependencies live only in the game's Managed folder. Preload
 # them, and keep the fallback resolver dead simple - a handler that itself
