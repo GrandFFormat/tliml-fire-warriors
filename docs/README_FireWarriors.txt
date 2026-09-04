@@ -576,6 +576,21 @@ a save made with this mod has a "known recipe" entry pointing at a slot
 that won't exist if you later play without the mod. It hasn't caused a
 problem in testing, but it's the reason to keep a save backup.
 
+v7.27.0: the crafting menu now refreshes itself the moment the recipe is
+(re-)added. v7.26.0 made the item come back on its own after a save load,
+but the menu only ever rebuilds its visible list when you open it - so if
+the menu happened to already be open, the entry was there without being
+drawn, and you had to close and reopen it. The mod now calls the game's
+own refresh on the open menu. That was the last step still needing you to
+do something by hand.
+
+To be clear about what "permanent" can mean here: the recipe list belongs
+to the game and is rebuilt from the game's own data every time a save
+loads, so nothing a mod adds to it can be baked in permanently - not by
+this mod, not by any mod. What v7.26/v7.27 do instead is notice within a
+couple of seconds and put it back with no action from you. The end result
+is the same in practice: the item is simply always there.
+
 Installation
 ------------
 Drop FireWarriors.dll into BepInEx/plugins/ (already done for you if I

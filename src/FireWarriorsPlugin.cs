@@ -33,7 +33,7 @@ namespace TLIML.FireWarriors
     {
         public const string GUID = "local.tliml.firewarriors";
         public const string NAME = "TLIML Fire Warriors";
-        public const string VERSION = "7.26.0";
+        public const string VERSION = "7.27.0";
 
         internal static ManualLogSource Log;
 
@@ -447,6 +447,27 @@ namespace TLIML.FireWarriors
             }
         }
 
+        // The crafting menu only rebuilds its visible list in its own
+        // OnEnable, i.e. when you open it. So if the menu happens to be open
+        // at the moment the recipe is (re-)added, the entry exists but isn't
+        // drawn until you close and reopen it. Poking the game's own
+        // UpdateData() removes that last manual step; it's only called on an
+        // actual injection (once per save load at most), never per tick.
+        private static void RefreshCraftingMenuIfOpen()
+        {
+            try
+            {
+                var menu = UnityEngine.Object.FindObjectOfType<FeaturesDevelopmentControl>();
+                if (menu == null || !menu.isActiveAndEnabled) return;
+                menu.UpdateData();
+                WriteDebug("RefreshCraftingMenuIfOpen: the crafting menu was open - refreshed it so the item appears without closing/reopening.");
+            }
+            catch (Exception e)
+            {
+                WriteDebug("RefreshCraftingMenuIfOpen failed (non-fatal, just reopen the menu): " + e);
+            }
+        }
+
         private void TryInjectCraftableItem()
         {
             var reqs = ItemRequirements.Instance;
@@ -748,6 +769,8 @@ namespace TLIML.FireWarriors
 
                 InjectedCampfireItem = clonedItem;
                 craftItemInjected = true;
+
+                RefreshCraftingMenuIfOpen();
 
                 Log.LogInfo($"Added craftable '{CraftableItemDisplayName.Value}' to the crafting menu (cloned from '{donorName}').");
                 WriteDebug($"TryInjectCraftableItem: SUCCESS - injected recipe, new ItemProduction length = {newProduction.Length}.");
